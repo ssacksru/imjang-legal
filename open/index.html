@@ -47,7 +47,7 @@
   <h1>내집탐구에서 열기</h1>
   <!-- ⚠️ 값을 다시 적지 않는다. 공유 문구가 이미 값과 기준일을 들고 왔고,
        여기서 또 적으면 두 곳의 기준일이 갈릴 수 있다. -->
-  <p class="sub">앱이 있으면 그 단지로 바로 열립니다.<br>없으면 App Store로 안내해요.</p>
+  <p class="sub">앱이 있으면 이 화면을 지나 바로 열려요.<br>지금 보고 계시면 아직 앱이 없는 거예요.</p>
   <a class="btn" id="store" href="https://apps.apple.com/app/id6792628237">App Store에서 받기</a>
   <a class="btn ghost" id="retry" href="#">앱에서 열기</a>
 
@@ -57,12 +57,18 @@
   var deep = c ? "imjang://complex?complexId=" + encodeURIComponent(c) : "imjang://";
   document.getElementById("retry").href = deep;
 
-  /* 자동 열기 시도.
-     ⚠️ **iOS Safari에서 커스텀 스킴은 사용자 제스처 없이 열면 막히거나 오류 배너가 뜬다.**
-        그래서 조용히 시도하고, 실패해도 화면에는 버튼 둘이 남아 있게 한다 —
-        자동 열기는 편의이고, 버튼이 보장이다.
-     ⚠️ 자동으로 App Store로 넘기지 않는다. 앱이 있는데도 스토어로 튀면
-        "이미 있는데 왜?"가 되고, 그 판단을 우리가 대신 할 근거가 없다. */
+  /* 2026-08-05 — **universal links가 켜졌다.** 앱이 깔려 있으면 iOS가 이 페이지를 아예
+     거치지 않고 앱을 연다(AASA: /.well-known/apple-app-site-association).
+     그래서 이 화면을 보고 있다는 건 대개 **앱이 없다**는 뜻이다 — 문구도 그렇게 적었다.
+
+     자동 열기는 그래도 남겨 둔다. universal link가 안 잡히는 자리가 있기 때문이다:
+       · 카톡·인스타 같은 앱 안의 브라우저(인앱 웹뷰)
+       · 사용자가 한 번 "취소"를 눌러 iOS가 이 도메인을 기억한 경우
+       · 링크를 길게 눌러 "새 탭에서 열기"로 연 경우
+     ⚠️ 커스텀 스킴은 사용자 제스처 없이 열면 막히거나 오류 배너가 뜬다. 조용히 시도하고,
+        실패해도 버튼 둘이 남는다 — **자동 열기는 편의이고 버튼이 보장이다.**
+     ⚠️ 자동으로 App Store로 넘기지 않는다. 앱이 있는데 스토어로 튀면 "이미 있는데 왜"가 되고,
+        그 판단을 우리가 대신 할 근거가 없다. */
   try { location.replace(deep); } catch (e) {}
 </script>
 </body>
