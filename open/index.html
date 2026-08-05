@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내집탐구에서 열기</title>
+<meta name="description" content="내 조건으로 더 좋은 집 찾기 — 전국 실거래가와 근거를 함께 봅니다.">
+<meta name="robots" content="noindex">
+
+<!-- 공유 링크가 카톡·문자에서 카드로 뜨게 하는 최소 OG(설계 §6-a).
+     ⚠️ 단지별로 다른 카드가 아니다 — 이 페이지는 값을 말하지 않는다.
+        웹이 값을 말하기 시작하면 자(기준일·표본)를 관리해야 할 화면이 하나 더 생긴다. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="내집탐구">
+<meta property="og:title" content="내집탐구 — 내 조건으로 더 좋은 집 찾기">
+<meta property="og:description" content="전국 실거래가를 근거와 함께. 앱에서 이 단지의 추이를 확인하세요.">
+<meta name="twitter:card" content="summary">
+
+<style>
+  :root { color-scheme: light dark; }
+  html,body { margin:0; height:100%; }
+  body {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:22px; padding:32px; box-sizing:border-box;
+    background:#F7F5F0; color:#171A1F;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    text-align:center; -webkit-text-size-adjust:100%;
+  }
+  @media (prefers-color-scheme: dark) {
+    body { background:#101214; color:#F5F5F7; }
+    .sub { color:#98989D !important; }
+    .btn.ghost { color:#8FAEFF !important; }
+  }
+  h1 { font-size:19px; font-weight:700; margin:0; letter-spacing:-0.2px; }
+  .sub { font-size:14px; line-height:1.6; color:#747B86; margin:0; max-width:22em; }
+  .btn {
+    display:inline-block; padding:14px 22px; border-radius:999px;
+    font-size:15px; font-weight:700; text-decoration:none;
+    background:#2257D6; color:#fff; min-width:200px;
+  }
+  .btn.ghost { background:transparent; color:#2257D6; font-weight:600; font-size:14px; min-width:0; padding:8px 12px; }
+</style>
+</head>
+<body>
+  <!-- ⚠️ 저장소에 이미지가 없다. 없는 파일을 참조하면 깨진 아이콘이 뜨므로 글자로 대신한다.
+       로고를 넣으려면 이 저장소에 icon.png를 먼저 올려야 한다(지금은 없다). -->
+  <h1>내집탐구에서 열기</h1>
+  <!-- ⚠️ 값을 다시 적지 않는다. 공유 문구가 이미 값과 기준일을 들고 왔고,
+       여기서 또 적으면 두 곳의 기준일이 갈릴 수 있다. -->
+  <p class="sub">앱이 있으면 그 단지로 바로 열립니다.<br>없으면 App Store로 안내해요.</p>
+  <a class="btn" id="store" href="https://apps.apple.com/app/id6792628237">App Store에서 받기</a>
+  <a class="btn ghost" id="retry" href="#">앱에서 열기</a>
+
+<script>
+  // ?c=<complexId> → 앱 딥링크. 없으면 앱 홈으로 보낸다.
+  var c = new URLSearchParams(location.search).get("c");
+  var deep = c ? "imjang://complex?complexId=" + encodeURIComponent(c) : "imjang://";
+  document.getElementById("retry").href = deep;
+
+  /* 자동 열기 시도.
+     ⚠️ **iOS Safari에서 커스텀 스킴은 사용자 제스처 없이 열면 막히거나 오류 배너가 뜬다.**
+        그래서 조용히 시도하고, 실패해도 화면에는 버튼 둘이 남아 있게 한다 —
+        자동 열기는 편의이고, 버튼이 보장이다.
+     ⚠️ 자동으로 App Store로 넘기지 않는다. 앱이 있는데도 스토어로 튀면
+        "이미 있는데 왜?"가 되고, 그 판단을 우리가 대신 할 근거가 없다. */
+  try { location.replace(deep); } catch (e) {}
+</script>
+</body>
+</html>
