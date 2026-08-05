@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["DS8Q52AV7Y.com.ssacksru.imjang"],
+        "components": [
+          { "/": "/imjang-legal/open/*", "comment": "공유 링크 — 단지 하나를 앱에서 연다" },
+          { "/": "/open/*", "comment": "커스텀 도메인으로 옮겼을 때를 대비한 같은 경로" }
+        ]
+      }
+    ]
+  }
+}
