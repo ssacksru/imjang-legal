@@ -10,10 +10,12 @@
   ⚠️ 이 파일은 imjang 저장소 web/open/ 이 원본이다(생성물 — 직접 고치지 말 것).
      빌드: node scripts/build-open-page.mjs · 게시: node scripts/publish-open-page.mjs
      설계: docs/plans/2026-08-06-share-landing-design.md
+  이 페이지는 **앱 단지 상세의 축소판**처럼 그린다(사용자 지시 2026-08-06 "앱의 현재 상태와
+  흡사하게") — 네비바·히어로(자 한 줄 + 큰 값)·접힌 섹션 줄·실거래 목록의 문법을 앱
+  theme/tokens.ts 값 그대로 옮겼다. 받은 사람이 "이 앱의 화면이 이렇겠구나"를 보게.
 -->
 
-<!-- 정적 OG(설계 §3 — P1). 단지별 카드는 크롤러가 JS를 안 돌려 정적으론 불가능하다.
-     P2(Worker)에서 단지별로 바꾼다. 공유 '문구'가 이미 값을 들고 가므로 카드는 브랜드만. -->
+<!-- 정적 OG(P1 기본 카드) — 워커(P2)가 단지별로 바꾼다. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="내집탐구">
 <meta property="og:title" content="내집탐구 — 내 조건으로 더 좋은 집 찾기">
@@ -21,88 +23,141 @@
 <meta name="twitter:card" content="summary">
 
 <style>
-  /* 앱과 같은 시각 언어(theme/tokens.ts): 배경 #F7F5F0/#101214 · 코발트 #2257D6 ·
-     보조 #747B86. 페이지가 곧 앱의 첫인상이라 자·위계도 앱 히어로를 따른다. */
-  :root { color-scheme: light dark; }
+  /* 앱 theme/tokens.ts 이식: light/dark 팔레트·타이포 스케일(price.hero 32/38 -0.6 ·
+     sectionTitle 17/22 600 · subheadline 15/20 · caption 12/16). */
+  :root {
+    color-scheme: light dark;
+    --canvas:#F7F5F0; --card:#FFFFFF; --border:#E4E1DA; --pressed:#EDEBE6;
+    --t1:#171A1F; --t2:#525862; --t3:#747B86; --muted:#9A9FA7;
+    --accent:#2257D6; --grid:#ECECF0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --canvas:#101214; --card:#1B1E22; --border:#38383A; --pressed:#333940;
+      --t1:#F5F5F7; --t2:#C7C7CC; --t3:#98989D; --muted:#636366;
+      --accent:#8FAEFF; --grid:#2C2C2E;
+    }
+  }
   html,body { margin:0; }
   body {
-    min-height:100vh; box-sizing:border-box; padding:28px 24px 40px;
-    display:flex; flex-direction:column; align-items:center; gap:0;
-    background:#F7F5F0; color:#171A1F;
+    min-height:100vh; background:var(--canvas); color:var(--t1);
     font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
     -webkit-text-size-adjust:100%;
   }
-  main, header, footer { width:100%; max-width:420px; }
-  @media (prefers-color-scheme: dark) {
-    body { background:#101214; color:#F5F5F7; }
-    .sub, .basis, .tx-meta, .note { color:#98989D !important; }
-    .card { background:#1A1D21 !important; border-color:#2A2E33 !important; }
-    .btn.ghost { color:#8FAEFF !important; }
-    .tx-chip { background:#2A2E33 !important; color:#C7CBD1 !important; }
+  .wrap { max-width:420px; margin:0 auto; padding-bottom:44px; }
+
+  /* 네비바 — 앱 상단 바와 같은 문법(가운데 제목 · 오른쪽 공유/홈). sticky로 앱처럼 붙는다. */
+  nav {
+    position:sticky; top:0; z-index:2; background:var(--canvas);
+    display:grid; grid-template-columns:56px 1fr 56px; align-items:center;
+    height:48px; border-bottom:0.5px solid var(--border);
+  }
+  nav .ttl { grid-column:2; text-align:center; font-size:17px; font-weight:600; letter-spacing:-0.2px;
+             overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  nav .btns { grid-column:3; display:flex; gap:12px; justify-content:flex-end; padding-right:16px; }
+  nav .btns a, nav .btns button {
+    background:none; border:none; padding:4px; margin:0; cursor:pointer;
+    color:var(--accent); font-size:17px; line-height:1; text-decoration:none;
   }
 
-  .brand { font-size:13px; font-weight:700; letter-spacing:-0.1px; color:#2257D6; }
-  .brand small { font-weight:500; color:#747B86; margin-left:6px; letter-spacing:0; }
+  .hero { padding:24px 20px 12px; }
+  .basis { font-size:15px; line-height:20px; letter-spacing:-0.1px; color:var(--t2); }
+  .basis .i { font-size:12px; color:var(--muted); }
+  .hero-price { font-size:32px; line-height:38px; font-weight:700; letter-spacing:-0.6px;
+                font-variant-numeric:tabular-nums; margin-top:2px; }
+  .hero-sub { font-size:12px; line-height:16px; color:var(--t3); margin-top:8px; }
 
-  .card {
-    margin-top:14px; padding:20px; border-radius:16px; background:#FFFFFF;
-    border:1px solid #E4E1DA; box-sizing:border-box;
+  /* 접힌 섹션 줄 — 앱 FoldSection과 같은 자리·같은 문법. 이 페이지의 청중은 미설치자라
+     도착지는 App Store다(제스처를 흉내만 내는 죽은 줄을 두지 않는다). */
+  .fold {
+    display:flex; align-items:center; gap:8px; min-height:44px; padding:0 20px;
+    text-decoration:none; color:inherit;
   }
-  #pv-name { font-size:21px; font-weight:800; letter-spacing:-0.3px; line-height:1.3; }
-  .sub { font-size:13px; line-height:1.55; color:#747B86; margin-top:4px; }
-  #pv-price { font-size:17px; font-weight:700; margin-top:16px; letter-spacing:-0.2px;
-              font-variant-numeric:tabular-nums; }
-  .basis { font-size:12px; color:#747B86; margin-top:3px; font-variant-numeric:tabular-nums; }
+  .fold:active { background:var(--pressed); }
+  .fold .ft { font-size:17px; font-weight:600; letter-spacing:-0.2px; color:var(--t1); }
+  .fold .fs { margin-left:auto; font-size:12px; color:var(--t3); }
+  .fold .chev { color:var(--muted); font-size:13px; font-weight:700; }
 
-  #pv-tx { margin-top:18px; }
-  #pv-tx-title { font-size:13px; font-weight:700; margin:0 0 8px; }
-  #pv-tx-rows { list-style:none; margin:0; padding:0; font-variant-numeric:tabular-nums; }
-  #pv-tx-rows li {
-    display:flex; align-items:baseline; gap:8px; padding:7px 0;
-    border-top:1px solid rgba(128,128,128,0.14); font-size:13.5px;
-  }
-  .tx-date { color:#747B86; font-size:12px; flex:none; }
-  .tx-price { font-weight:700; }
-  .tx-meta { color:#747B86; font-size:12px; margin-left:auto; }
+  .chart-wrap { padding:14px 20px 0; }
+  .chart-note { font-size:12px; color:var(--muted); padding:4px 20px 0; font-variant-numeric:tabular-nums; }
+  svg text { font-family:inherit; }
+
+  .txsec { padding:28px 20px 0; }
+  .txsec h2 { font-size:17px; font-weight:600; letter-spacing:-0.2px; margin:0; }
+  .txcap { font-size:12px; color:var(--t3); margin-top:2px; font-variant-numeric:tabular-nums; }
+  #pv-tx-rows { list-style:none; margin:6px 0 0; padding:0; font-variant-numeric:tabular-nums; }
+  #pv-tx-rows li { display:flex; align-items:baseline; gap:8px; padding:9px 0;
+                   border-bottom:0.5px solid var(--border); }
+  .tx-price { font-size:18px; font-weight:700; letter-spacing:-0.25px; }
   .tx-chip { flex:none; font-size:10.5px; font-weight:600; padding:2px 6px; border-radius:5px;
-             background:#ECEAE5; color:#5A6068; }
+             background:var(--pressed); color:var(--t2); }
+  .tx-meta { margin-left:auto; font-size:12px; color:var(--t3); text-align:right; }
 
-  footer { display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:22px; text-align:center; }
+  footer { display:flex; flex-direction:column; align-items:center; gap:12px;
+           margin-top:30px; padding:0 20px; text-align:center; }
   .btn {
-    display:inline-block; padding:14px 22px; border-radius:999px;
-    font-size:15px; font-weight:700; text-decoration:none;
-    background:#2257D6; color:#fff; min-width:220px; box-sizing:border-box;
+    display:block; width:100%; max-width:340px; padding:15px 22px; border-radius:12px;
+    font-size:15px; font-weight:700; text-decoration:none; text-align:center;
+    background:var(--accent); color:#fff; box-sizing:border-box;
   }
-  .btn.ghost { background:transparent; color:#2257D6; font-weight:600; font-size:14px; min-width:0; padding:8px 12px; }
-  .note { font-size:12.5px; line-height:1.6; color:#747B86; margin:0; max-width:24em; }
-  .stance { font-size:12px; color:#747B86; margin-top:2px; }
+  @media (prefers-color-scheme: dark) { .btn { color:#111; } }
+  .btn.ghost { background:transparent; color:var(--accent); font-weight:600; font-size:14px; padding:8px 12px; }
+  .note { font-size:12.5px; line-height:1.6; color:var(--t3); margin:0; max-width:24em; }
+  .stance { font-size:12px; color:var(--muted); margin-top:0; }
+  .brandline { font-size:12px; color:var(--t3); margin-top:14px; }
+  .brandline b { color:var(--accent); font-weight:700; }
 </style>
 </head>
 <body>
-  <header><div class="brand">내집탐구<small>내 조건으로 더 좋은 집 찾기</small></div></header>
+<div class="wrap">
+  <nav>
+    <div class="ttl" id="nav-title">내집탐구</div>
+    <div class="btns">
+      <!-- 앱 헤더의 그 두 버튼(공유 ↥ · 홈 ⌂). 여기선 ↥=이 페이지 공유(Web Share),
+           ⌂=App Store — 미설치자의 '홈'은 스토어다. -->
+      <button id="share-btn" hidden aria-label="공유">&#8613;</button>
+      <a id="home-btn" href="https://apps.apple.com/app/id6792628237" aria-label="App Store">&#8962;</a>
+    </div>
+  </nav>
 
-  <!-- 미리보기 — 자료가 도착했을 때만 나타난다. 실패하면 이 블록 없이 아래 중계만 남는다(§2-3). -->
-  <main id="preview" hidden class="card">
-    <div id="pv-name"></div>
-    <div id="pv-sub" class="sub"></div>
-    <div id="pv-price" hidden></div>
-    <div id="pv-basis" class="basis" hidden></div>
-    <section id="pv-tx" hidden>
-      <h2 id="pv-tx-title"></h2>
+  <main id="preview" hidden>
+    <div class="hero">
+      <div class="basis" id="pv-basis-line" hidden></div>
+      <div class="hero-price" id="pv-price" hidden></div>
+      <div class="hero-sub" id="pv-sub"></div>
+    </div>
+
+    <a class="fold" id="fold-listings" hidden href="https://apps.apple.com/app/id6792628237">
+      <span class="ft">지금 나온 매물</span><span class="fs">앱에서</span><span class="chev">&#8250;</span>
+    </a>
+    <a class="fold" id="fold-position" hidden href="https://apps.apple.com/app/id6792628237">
+      <span class="ft">이 가격은 어디쯤인가</span><span class="fs">앱에서</span><span class="chev">&#8250;</span>
+    </a>
+
+    <div class="chart-wrap" id="pv-chart" hidden></div>
+    <div class="chart-note" id="pv-chart-note" hidden></div>
+
+    <section class="txsec" id="pv-tx" hidden>
+      <h2>실거래 내역</h2>
+      <div class="txcap" id="pv-tx-cap"></div>
       <ol id="pv-tx-rows"></ol>
     </section>
   </main>
 
+  <!-- 자료가 없거나 실패해도 여기부터는 항상 선다(설계 §2-3: 중계가 1급). -->
   <footer>
+    <div id="pv-name-fallback" hidden style="font-size:17px;font-weight:700;"></div>
     <a class="btn" id="store" href="https://apps.apple.com/app/id6792628237">실거래 추이와 근거까지 앱에서 보기</a>
     <a class="btn ghost" id="retry" href="#">앱에서 열기</a>
     <p class="note" id="android-note" hidden>지금은 iOS에서 쓸 수 있어요. 위 실거래는 여기서 그대로 보실 수 있어요.</p>
     <p class="note">앱이 있으면 이 화면을 지나 바로 열려요.</p>
     <p class="stance">판정 대신, 근거를 드려요</p>
+    <p class="brandline"><b>내집탐구</b> · 내 조건으로 더 좋은 집 찾기</p>
   </footer>
+</div>
 
 <script>
-(()=>{function b(n){if(n==null||!Number.isFinite(n))return"-";let t=n<0?"-":"",o=Math.abs(n),r=Math.floor(o/1e4),l=o%1e4;return r>0&&l>0?`${t}${r}\uC5B5 ${l.toLocaleString("ko-KR")}\uB9CC\uC6D0`:r>0?`${t}${r}\uC5B5\uC6D0`:`${t}${l.toLocaleString("ko-KR")}\uB9CC\uC6D0`}var _={small:"23\uD3C9 \uC774\uD558",p24:"25\uD3C9",mid:"26~33\uD3C9",p34:"34\uD3C9",large:"35\uD3C9 \uC774\uC0C1"};function g(n){if(n==null||!Number.isFinite(n))return null;let t=n;return t<57?"small":t<=60?"p24":t<83?"mid":t<=85?"p34":"large"}var s={brand:"\uB0B4\uC9D1\uD0D0\uAD6C",tagline:"\uB0B4 \uC870\uAC74\uC73C\uB85C \uB354 \uC88B\uC740 \uC9D1 \uCC3E\uAE30",ctaStore:"\uC2E4\uAC70\uB798 \uCD94\uC774\uC640 \uADFC\uAC70\uAE4C\uC9C0 \uC571\uC5D0\uC11C \uBCF4\uAE30",ctaOpen:"\uC571\uC5D0\uC11C \uC5F4\uAE30",androidNote:"\uC9C0\uAE08\uC740 iOS\uC5D0\uC11C \uC4F8 \uC218 \uC788\uC5B4\uC694. \uC704 \uC2E4\uAC70\uB798\uB294 \uC5EC\uAE30\uC11C \uADF8\uB300\uB85C \uBCF4\uC2E4 \uC218 \uC788\uC5B4\uC694.",relayNote:"\uC571\uC774 \uC788\uC73C\uBA74 \uC774 \uD654\uBA74\uC744 \uC9C0\uB098 \uBC14\uB85C \uC5F4\uB824\uC694.",stance:"\uD310\uC815 \uB300\uC2E0, \uADFC\uAC70\uB97C \uB4DC\uB824\uC694",saleMedianOf:"\uB9E4\uB9E4 \uC911\uC704",txTitle:"\uC2E4\uAC70\uB798 \uCD5C\uADFC 5\uAC74",dealDirect:"\uC9C1\uAC70\uB798",floorSuffix:"\uCE35",gone:"\uC774 \uB2E8\uC9C0 \uC8FC\uC18C\uAC00 \uBC14\uB00C\uC5C8\uC5B4\uC694 \u2014 \uC571\uC5D0\uC11C \uB2E8\uC9C0\uBA85\uC73C\uB85C \uCC3E\uC544\uC8FC\uC138\uC694."};function x(n){return n===90?"\uCD5C\uADFC 3\uAC1C\uC6D4":n===180?"\uCD5C\uADFC 6\uAC1C\uC6D4":n===365?"\uCD5C\uADFC 12\uAC1C\uC6D4":"\uCD5C\uADFC \uAC70\uB798"}var R="https://ynttnnbdmjacyjehlmci.supabase.co",h="sb_publishable_Zn9BGQHaRoOBHtXywLmuUQ_Yz2bFTZw";async function m(n,t){var l;let o=new AbortController,r=setTimeout(()=>o.abort(),3500);try{let e=await fetch(R+n,{...t,headers:{apikey:h,Authorization:`Bearer ${h}`,"Content-Type":"application/json",...(l=t==null?void 0:t.headers)!=null?l:{}},signal:o.signal});if(!e.ok)throw new Error(`HTTP ${e.status}`);return await e.json()}finally{clearTimeout(r)}}var u=n=>document.getElementById(n),a=n=>{u(n).hidden=!1};function y(n){let t=n?`imjang://complex?complexId=${encodeURIComponent(n)}`:"imjang://";return u("retry").href=t,t}function w(n){let t=n.filter(o=>{var r;return o.sale_median!=null&&((r=o.sale_count)!=null?r:0)>0});return t.length===0?null:t.sort((o,r)=>{var l,e;return((l=r.sale_count)!=null?l:0)-((e=o.sale_count)!=null?e:0)})[0]}function $(n){var o,r;u("pv-name").textContent=n.name;let t=[(r=(o=n.jibun_address)!=null?o:n.road_address)!=null?r:"",n.build_year!=null?`${n.build_year}\uB144`:"",n.total_units!=null?`${n.total_units.toLocaleString("ko-KR")}\uC138\uB300`:""].filter(Boolean).join(" \xB7 ");u("pv-sub").textContent=t,a("preview")}function T(n){var r,l;let t=(r=_[n.band])!=null?r:n.band,o=((l=n.sale_count)!=null?l:0)<3?"~":"";u("pv-price").textContent=`${t} ${s.saleMedianOf} ${o}${b(n.sale_median)}`,u("pv-basis").textContent=`${x(n.sale_window)} \xB7 ${n.sale_count}\uAC74 \uAE30\uC900`,a("pv-price"),a("pv-basis")}function E(n,t){var l;let o=t.filter(e=>g(e.exclusive_m2)===n).slice(0,5);if(o.length===0)return;u("pv-tx-title").textContent=`${s.txTitle} \xB7 ${(l=_[n])!=null?l:n}`;let r=u("pv-tx-rows");for(let e of o){let c=document.createElement("li"),d=document.createElement("span");d.className="tx-date",d.textContent=e.contract_date.replaceAll("-",".");let i=document.createElement("span");i.className="tx-price",i.textContent=b(e.price_man);let p=document.createElement("span");if(p.className="tx-meta",p.textContent=[e.floor!=null?`${e.floor}${s.floorSuffix}`:"",`${Math.round(e.exclusive_m2)}\u33A1`].filter(Boolean).join(" \xB7 "),c.append(d,i,p),e.deal==="\uC9C1\uAC70\uB798"){let f=document.createElement("span");f.className="tx-chip",f.textContent=s.dealDirect,c.append(f)}r.append(c)}a("pv-tx")}async function L(){var o;let n=new URLSearchParams(location.search).get("c"),t=y(n);if(/android/i.test(navigator.userAgent))u("store").hidden=!0,u("retry").hidden=!0,a("android-note");else try{location.replace(t)}catch(r){}if(!(!n||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(n)))try{let r="id,name,road_address,jibun_address,build_year,total_units,merged_into",l=await m(`/rest/v1/complex?id=eq.${n}&select=${r}`),e=(o=l[0])!=null?o:null;if(e!=null&&e.merged_into&&e.merged_into!==e.id&&(l=await m(`/rest/v1/complex?id=eq.${e.merged_into}&select=${r}`),l[0]&&(e=l[0],y(e.id))),!e){u("pv-name").textContent=s.gone,a("preview");return}$(e);let[c,d]=await Promise.all([m("/rest/v1/rpc/complex_band_metrics",{method:"POST",body:JSON.stringify({p_complex_id:e.id})}),m(`/rest/v1/transaction?complex_id=eq.${e.id}&trade_type=eq.sale&cancelled_at=is.null&select=contract_date,price_man,floor,exclusive_m2,deal:raw->>dealingGbn&order=contract_date.desc&limit=40`)]),i=w(c);i&&(T(i),E(i.band,d))}catch(r){}}L();})();
+(()=>{function x(t){if(t==null||!Number.isFinite(t))return"-";let e=t<0?"-":"",r=Math.abs(t),n=Math.floor(r/1e4),l=r%1e4;return n>0&&l>0?`${e}${n}\uC5B5 ${l.toLocaleString("ko-KR")}\uB9CC\uC6D0`:n>0?`${e}${n}\uC5B5\uC6D0`:`${e}${l.toLocaleString("ko-KR")}\uB9CC\uC6D0`}var R={small:"23\uD3C9 \uC774\uD558",p24:"25\uD3C9",mid:"26~33\uD3C9",p34:"34\uD3C9",large:"35\uD3C9 \uC774\uC0C1"};function S(t){if(t==null||!Number.isFinite(t))return null;let e=t;return e<57?"small":e<=60?"p24":e<83?"mid":e<=85?"p34":"large"}var g={brand:"\uB0B4\uC9D1\uD0D0\uAD6C",tagline:"\uB0B4 \uC870\uAC74\uC73C\uB85C \uB354 \uC88B\uC740 \uC9D1 \uCC3E\uAE30",ctaStore:"\uC2E4\uAC70\uB798 \uCD94\uC774\uC640 \uADFC\uAC70\uAE4C\uC9C0 \uC571\uC5D0\uC11C \uBCF4\uAE30",ctaOpen:"\uC571\uC5D0\uC11C \uC5F4\uAE30",androidNote:"\uC9C0\uAE08\uC740 iOS\uC5D0\uC11C \uC4F8 \uC218 \uC788\uC5B4\uC694. \uC704 \uC2E4\uAC70\uB798\uB294 \uC5EC\uAE30\uC11C \uADF8\uB300\uB85C \uBCF4\uC2E4 \uC218 \uC788\uC5B4\uC694.",relayNote:"\uC571\uC774 \uC788\uC73C\uBA74 \uC774 \uD654\uBA74\uC744 \uC9C0\uB098 \uBC14\uB85C \uC5F4\uB824\uC694.",stance:"\uD310\uC815 \uB300\uC2E0, \uADFC\uAC70\uB97C \uB4DC\uB824\uC694",saleMedianOf:"\uB9E4\uB9E4 \uC911\uC704",medianSaleLabel:"\uC911\uC704 \uB9E4\uB9E4\uAC00",txTitle:"\uC2E4\uAC70\uB798 \uCD5C\uADFC 5\uAC74",dealDirect:"\uC9C1\uAC70\uB798",floorSuffix:"\uCE35",gone:"\uC774 \uB2E8\uC9C0 \uC8FC\uC18C\uAC00 \uBC14\uB00C\uC5C8\uC5B4\uC694 \u2014 \uC571\uC5D0\uC11C \uB2E8\uC9C0\uBA85\uC73C\uB85C \uCC3E\uC544\uC8FC\uC138\uC694.",chartNote:"\uC810 \uD558\uB098\uAC00 \uC2E4\uAC70\uB798 \uD55C \uAC74"};function v(t){return t===90?"\uCD5C\uADFC 3\uAC1C\uC6D4":t===180?"\uCD5C\uADFC 6\uAC1C\uC6D4":t===365?"\uCD5C\uADFC 12\uAC1C\uC6D4":"\uCD5C\uADFC \uAC70\uB798"}var L="https://ynttnnbdmjacyjehlmci.supabase.co",w="sb_publishable_Zn9BGQHaRoOBHtXywLmuUQ_Yz2bFTZw",M=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,C="id,name,road_address,jibun_address,build_year,total_units,merged_into";function N(t){let e=t.filter(r=>{var n;return r.sale_median!=null&&((n=r.sale_count)!=null?n:0)>0});return e.length===0?null:e.sort((r,n)=>{var l,o;return((l=n.sale_count)!=null?l:0)-((o=r.sale_count)!=null?o:0)})[0]}async function y(t,e){var l;let r=new AbortController,n=setTimeout(()=>r.abort(),3500);try{let o=await fetch(L+t,{...e,headers:{apikey:w,Authorization:`Bearer ${w}`,"Content-Type":"application/json",...(l=e==null?void 0:e.headers)!=null?l:{}},signal:r.signal});if(!o.ok)throw new Error(`HTTP ${o.status}`);return await o.json()}finally{clearTimeout(n)}}var s=t=>document.getElementById(t),m=t=>{s(t).hidden=!1};function B(t){let e=t?`imjang://complex?complexId=${encodeURIComponent(t)}`:"imjang://";return s("retry").href=e,e}function k(t){var e,r;s("nav-title").textContent=t.name,s("pv-sub").textContent=[(r=(e=t.jibun_address)!=null?e:t.road_address)!=null?r:"",t.build_year!=null?`${t.build_year}\uB144`:"",t.total_units!=null?`${t.total_units.toLocaleString("ko-KR")}\uC138\uB300`:""].filter(Boolean).join(" \xB7 "),m("preview"),m("fold-listings"),m("fold-position")}function P(t){var n,l;let e=(n=R[t.band])!=null?n:t.band;s("pv-basis-line").textContent=`${e} \xB7 ${g.medianSaleLabel} \xB7 ${v(t.sale_window)} ${t.sale_count}\uAC74`;let r=((l=t.sale_count)!=null?l:0)<3?"~":"";s("pv-price").textContent=`${r}${x(t.sale_median)}`,m("pv-basis-line"),m("pv-price")}function K(t){let e=t.filter(i=>i.price_man!=null).map(i=>({x:Date.parse(i.contract_date),y:i.price_man})).sort((i,u)=>i.x-u.x);if(e.length<3)return;let r=380,n=120,l=6,o=e.map(i=>i.x),a=e.map(i=>i.y),c=Math.min(...o),d=Math.max(...o),p=Math.min(...a),f=Math.max(...a),$=i=>d===c?r/2:l+(i-c)/(d-c)*(r-l*2),E=i=>f===p?n/2:n-l-(i-p)/(f-p)*(n-l*2),h="http://www.w3.org/2000/svg",b=document.createElementNS(h,"svg");b.setAttribute("viewBox",`0 0 ${r} ${n}`),b.setAttribute("width","100%"),b.style.display="block";for(let i of[n*.33,n*.66]){let u=document.createElementNS(h,"line");u.setAttribute("x1","0"),u.setAttribute("x2",String(r)),u.setAttribute("y1",String(i)),u.setAttribute("y2",String(i)),u.setAttribute("stroke","var(--grid)"),u.setAttribute("stroke-width","1"),b.append(u)}for(let i of e){let u=document.createElementNS(h,"circle");u.setAttribute("cx",String($(i.x))),u.setAttribute("cy",String(E(i.y))),u.setAttribute("r","3"),u.setAttribute("fill","var(--accent)"),u.setAttribute("fill-opacity","0.75"),b.append(u)}let A=e[e.length-1],_=document.createElementNS(h,"circle");_.setAttribute("cx",String($(A.x))),_.setAttribute("cy",String(E(A.y))),_.setAttribute("r","4.5"),_.setAttribute("fill","var(--accent)"),b.append(_),s("pv-chart").append(b);let D=new Date(c),O=new Date(d),T=i=>`${i.getFullYear()}.${String(i.getMonth()+1).padStart(2,"0")}`;s("pv-chart-note").textContent=`${T(D)}~${T(O)} \xB7 ${g.chartNote} \xB7 ${x(p)}~${x(f)}`,m("pv-chart"),m("pv-chart-note")}function F(t,e){var o;let r=e.filter(a=>S(a.exclusive_m2)===t),n=r.slice(0,5);if(n.length===0)return;K(r),s("pv-tx-cap").textContent=`${(o=R[t])!=null?o:t} \xB7 ${n.length}\uAC74 \xB7 \uCD5C\uADFC\uC21C`;let l=s("pv-tx-rows");for(let a of n){let c=document.createElement("li"),d=document.createElement("span");if(d.className="tx-price",d.textContent=x(a.price_man),c.append(d),a.deal==="\uC9C1\uAC70\uB798"){let f=document.createElement("span");f.className="tx-chip",f.textContent=g.dealDirect,c.append(f)}let p=document.createElement("span");p.className="tx-meta",p.textContent=[`${Math.round(a.exclusive_m2)}\u33A1`,a.floor!=null?`${a.floor}${g.floorSuffix}`:"",a.contract_date.slice(2).replaceAll("-",".")].filter(Boolean).join(" \xB7 "),c.append(p),l.append(c)}m("pv-tx")}async function j(){var r;let t=new URLSearchParams(location.search).get("c"),e=B(t);if(typeof navigator.share=="function"&&(m("share-btn"),s("share-btn").addEventListener("click",()=>{navigator.share({url:location.href}).catch(()=>{})})),/android/i.test(navigator.userAgent))s("store").hidden=!0,s("retry").hidden=!0,s("home-btn").hidden=!0,m("android-note");else try{location.replace(e)}catch(n){}if(!(!t||!M.test(t)))try{let n=C,l=await y(`/rest/v1/complex?id=eq.${t}&select=${n}`),o=(r=l[0])!=null?r:null;if(o!=null&&o.merged_into&&o.merged_into!==o.id&&(l=await y(`/rest/v1/complex?id=eq.${o.merged_into}&select=${n}`),l[0]&&(o=l[0],B(o.id))),!o){s("pv-name-fallback").textContent=g.gone,m("pv-name-fallback");return}k(o);let[a,c]=await Promise.all([y("/rest/v1/rpc/complex_band_metrics",{method:"POST",body:JSON.stringify({p_complex_id:o.id})}),y(`/rest/v1/transaction?complex_id=eq.${o.id}&trade_type=eq.sale&cancelled_at=is.null&select=contract_date,price_man,floor,exclusive_m2,deal:raw->>dealingGbn&order=contract_date.desc&limit=60`)]),d=N(a);d&&(P(d),F(d.band,c))}catch(n){}}j();})();
 </script>
 </body>
 </html>
