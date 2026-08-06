@@ -6,10 +6,14 @@
 <title>내집탐구에서 열기</title>
 <meta name="description" content="내 조건으로 더 좋은 집 찾기 — 전국 실거래가와 근거를 함께 봅니다.">
 <meta name="robots" content="noindex">
+<!--
+  ⚠️ 이 파일은 imjang 저장소 web/open/ 이 원본이다(생성물 — 직접 고치지 말 것).
+     빌드: node scripts/build-open-page.mjs · 게시: node scripts/publish-open-page.mjs
+     설계: docs/plans/2026-08-06-share-landing-design.md
+-->
 
-<!-- 공유 링크가 카톡·문자에서 카드로 뜨게 하는 최소 OG(설계 §6-a).
-     ⚠️ 단지별로 다른 카드가 아니다 — 이 페이지는 값을 말하지 않는다.
-        웹이 값을 말하기 시작하면 자(기준일·표본)를 관리해야 할 화면이 하나 더 생긴다. -->
+<!-- 정적 OG(설계 §3 — P1). 단지별 카드는 크롤러가 JS를 안 돌려 정적으론 불가능하다.
+     P2(Worker)에서 단지별로 바꾼다. 공유 '문구'가 이미 값을 들고 가므로 카드는 브랜드만. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="내집탐구">
 <meta property="og:title" content="내집탐구 — 내 조건으로 더 좋은 집 찾기">
@@ -17,59 +21,88 @@
 <meta name="twitter:card" content="summary">
 
 <style>
+  /* 앱과 같은 시각 언어(theme/tokens.ts): 배경 #F7F5F0/#101214 · 코발트 #2257D6 ·
+     보조 #747B86. 페이지가 곧 앱의 첫인상이라 자·위계도 앱 히어로를 따른다. */
   :root { color-scheme: light dark; }
-  html,body { margin:0; height:100%; }
+  html,body { margin:0; }
   body {
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:22px; padding:32px; box-sizing:border-box;
+    min-height:100vh; box-sizing:border-box; padding:28px 24px 40px;
+    display:flex; flex-direction:column; align-items:center; gap:0;
     background:#F7F5F0; color:#171A1F;
     font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
-    text-align:center; -webkit-text-size-adjust:100%;
+    -webkit-text-size-adjust:100%;
   }
+  main, header, footer { width:100%; max-width:420px; }
   @media (prefers-color-scheme: dark) {
     body { background:#101214; color:#F5F5F7; }
-    .sub { color:#98989D !important; }
+    .sub, .basis, .tx-meta, .note { color:#98989D !important; }
+    .card { background:#1A1D21 !important; border-color:#2A2E33 !important; }
     .btn.ghost { color:#8FAEFF !important; }
+    .tx-chip { background:#2A2E33 !important; color:#C7CBD1 !important; }
   }
-  h1 { font-size:19px; font-weight:700; margin:0; letter-spacing:-0.2px; }
-  .sub { font-size:14px; line-height:1.6; color:#747B86; margin:0; max-width:22em; }
+
+  .brand { font-size:13px; font-weight:700; letter-spacing:-0.1px; color:#2257D6; }
+  .brand small { font-weight:500; color:#747B86; margin-left:6px; letter-spacing:0; }
+
+  .card {
+    margin-top:14px; padding:20px; border-radius:16px; background:#FFFFFF;
+    border:1px solid #E4E1DA; box-sizing:border-box;
+  }
+  #pv-name { font-size:21px; font-weight:800; letter-spacing:-0.3px; line-height:1.3; }
+  .sub { font-size:13px; line-height:1.55; color:#747B86; margin-top:4px; }
+  #pv-price { font-size:17px; font-weight:700; margin-top:16px; letter-spacing:-0.2px;
+              font-variant-numeric:tabular-nums; }
+  .basis { font-size:12px; color:#747B86; margin-top:3px; font-variant-numeric:tabular-nums; }
+
+  #pv-tx { margin-top:18px; }
+  #pv-tx-title { font-size:13px; font-weight:700; margin:0 0 8px; }
+  #pv-tx-rows { list-style:none; margin:0; padding:0; font-variant-numeric:tabular-nums; }
+  #pv-tx-rows li {
+    display:flex; align-items:baseline; gap:8px; padding:7px 0;
+    border-top:1px solid rgba(128,128,128,0.14); font-size:13.5px;
+  }
+  .tx-date { color:#747B86; font-size:12px; flex:none; }
+  .tx-price { font-weight:700; }
+  .tx-meta { color:#747B86; font-size:12px; margin-left:auto; }
+  .tx-chip { flex:none; font-size:10.5px; font-weight:600; padding:2px 6px; border-radius:5px;
+             background:#ECEAE5; color:#5A6068; }
+
+  footer { display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:22px; text-align:center; }
   .btn {
     display:inline-block; padding:14px 22px; border-radius:999px;
     font-size:15px; font-weight:700; text-decoration:none;
-    background:#2257D6; color:#fff; min-width:200px;
+    background:#2257D6; color:#fff; min-width:220px; box-sizing:border-box;
   }
   .btn.ghost { background:transparent; color:#2257D6; font-weight:600; font-size:14px; min-width:0; padding:8px 12px; }
+  .note { font-size:12.5px; line-height:1.6; color:#747B86; margin:0; max-width:24em; }
+  .stance { font-size:12px; color:#747B86; margin-top:2px; }
 </style>
 </head>
 <body>
-  <!-- ⚠️ 저장소에 이미지가 없다. 없는 파일을 참조하면 깨진 아이콘이 뜨므로 글자로 대신한다.
-       로고를 넣으려면 이 저장소에 icon.png를 먼저 올려야 한다(지금은 없다). -->
-  <h1>내집탐구에서 열기</h1>
-  <!-- ⚠️ 값을 다시 적지 않는다. 공유 문구가 이미 값과 기준일을 들고 왔고,
-       여기서 또 적으면 두 곳의 기준일이 갈릴 수 있다. -->
-  <p class="sub">앱이 있으면 이 화면을 지나 바로 열려요.<br>지금 보고 계시면 아직 앱이 없는 거예요.</p>
-  <a class="btn" id="store" href="https://apps.apple.com/app/id6792628237">App Store에서 받기</a>
-  <a class="btn ghost" id="retry" href="#">앱에서 열기</a>
+  <header><div class="brand">내집탐구<small>내 조건으로 더 좋은 집 찾기</small></div></header>
+
+  <!-- 미리보기 — 자료가 도착했을 때만 나타난다. 실패하면 이 블록 없이 아래 중계만 남는다(§2-3). -->
+  <main id="preview" hidden class="card">
+    <div id="pv-name"></div>
+    <div id="pv-sub" class="sub"></div>
+    <div id="pv-price" hidden></div>
+    <div id="pv-basis" class="basis" hidden></div>
+    <section id="pv-tx" hidden>
+      <h2 id="pv-tx-title"></h2>
+      <ol id="pv-tx-rows"></ol>
+    </section>
+  </main>
+
+  <footer>
+    <a class="btn" id="store" href="https://apps.apple.com/app/id6792628237">실거래 추이와 근거까지 앱에서 보기</a>
+    <a class="btn ghost" id="retry" href="#">앱에서 열기</a>
+    <p class="note" id="android-note" hidden>지금은 iOS에서 쓸 수 있어요. 위 실거래는 여기서 그대로 보실 수 있어요.</p>
+    <p class="note">앱이 있으면 이 화면을 지나 바로 열려요.</p>
+    <p class="stance">판정 대신, 근거를 드려요</p>
+  </footer>
 
 <script>
-  // ?c=<complexId> → 앱 딥링크. 없으면 앱 홈으로 보낸다.
-  var c = new URLSearchParams(location.search).get("c");
-  var deep = c ? "imjang://complex?complexId=" + encodeURIComponent(c) : "imjang://";
-  document.getElementById("retry").href = deep;
-
-  /* 2026-08-05 — **universal links가 켜졌다.** 앱이 깔려 있으면 iOS가 이 페이지를 아예
-     거치지 않고 앱을 연다(AASA: /.well-known/apple-app-site-association).
-     그래서 이 화면을 보고 있다는 건 대개 **앱이 없다**는 뜻이다 — 문구도 그렇게 적었다.
-
-     자동 열기는 그래도 남겨 둔다. universal link가 안 잡히는 자리가 있기 때문이다:
-       · 카톡·인스타 같은 앱 안의 브라우저(인앱 웹뷰)
-       · 사용자가 한 번 "취소"를 눌러 iOS가 이 도메인을 기억한 경우
-       · 링크를 길게 눌러 "새 탭에서 열기"로 연 경우
-     ⚠️ 커스텀 스킴은 사용자 제스처 없이 열면 막히거나 오류 배너가 뜬다. 조용히 시도하고,
-        실패해도 버튼 둘이 남는다 — **자동 열기는 편의이고 버튼이 보장이다.**
-     ⚠️ 자동으로 App Store로 넘기지 않는다. 앱이 있는데 스토어로 튀면 "이미 있는데 왜"가 되고,
-        그 판단을 우리가 대신 할 근거가 없다. */
-  try { location.replace(deep); } catch (e) {}
+(()=>{function b(n){if(n==null||!Number.isFinite(n))return"-";let t=n<0?"-":"",o=Math.abs(n),r=Math.floor(o/1e4),l=o%1e4;return r>0&&l>0?`${t}${r}\uC5B5 ${l.toLocaleString("ko-KR")}\uB9CC\uC6D0`:r>0?`${t}${r}\uC5B5\uC6D0`:`${t}${l.toLocaleString("ko-KR")}\uB9CC\uC6D0`}var _={small:"23\uD3C9 \uC774\uD558",p24:"25\uD3C9",mid:"26~33\uD3C9",p34:"34\uD3C9",large:"35\uD3C9 \uC774\uC0C1"};function g(n){if(n==null||!Number.isFinite(n))return null;let t=n;return t<57?"small":t<=60?"p24":t<83?"mid":t<=85?"p34":"large"}var s={brand:"\uB0B4\uC9D1\uD0D0\uAD6C",tagline:"\uB0B4 \uC870\uAC74\uC73C\uB85C \uB354 \uC88B\uC740 \uC9D1 \uCC3E\uAE30",ctaStore:"\uC2E4\uAC70\uB798 \uCD94\uC774\uC640 \uADFC\uAC70\uAE4C\uC9C0 \uC571\uC5D0\uC11C \uBCF4\uAE30",ctaOpen:"\uC571\uC5D0\uC11C \uC5F4\uAE30",androidNote:"\uC9C0\uAE08\uC740 iOS\uC5D0\uC11C \uC4F8 \uC218 \uC788\uC5B4\uC694. \uC704 \uC2E4\uAC70\uB798\uB294 \uC5EC\uAE30\uC11C \uADF8\uB300\uB85C \uBCF4\uC2E4 \uC218 \uC788\uC5B4\uC694.",relayNote:"\uC571\uC774 \uC788\uC73C\uBA74 \uC774 \uD654\uBA74\uC744 \uC9C0\uB098 \uBC14\uB85C \uC5F4\uB824\uC694.",stance:"\uD310\uC815 \uB300\uC2E0, \uADFC\uAC70\uB97C \uB4DC\uB824\uC694",saleMedianOf:"\uB9E4\uB9E4 \uC911\uC704",txTitle:"\uC2E4\uAC70\uB798 \uCD5C\uADFC 5\uAC74",dealDirect:"\uC9C1\uAC70\uB798",floorSuffix:"\uCE35",gone:"\uC774 \uB2E8\uC9C0 \uC8FC\uC18C\uAC00 \uBC14\uB00C\uC5C8\uC5B4\uC694 \u2014 \uC571\uC5D0\uC11C \uB2E8\uC9C0\uBA85\uC73C\uB85C \uCC3E\uC544\uC8FC\uC138\uC694."};function x(n){return n===90?"\uCD5C\uADFC 3\uAC1C\uC6D4":n===180?"\uCD5C\uADFC 6\uAC1C\uC6D4":n===365?"\uCD5C\uADFC 12\uAC1C\uC6D4":"\uCD5C\uADFC \uAC70\uB798"}var R="https://ynttnnbdmjacyjehlmci.supabase.co",h="sb_publishable_Zn9BGQHaRoOBHtXywLmuUQ_Yz2bFTZw";async function m(n,t){var l;let o=new AbortController,r=setTimeout(()=>o.abort(),3500);try{let e=await fetch(R+n,{...t,headers:{apikey:h,Authorization:`Bearer ${h}`,"Content-Type":"application/json",...(l=t==null?void 0:t.headers)!=null?l:{}},signal:o.signal});if(!e.ok)throw new Error(`HTTP ${e.status}`);return await e.json()}finally{clearTimeout(r)}}var u=n=>document.getElementById(n),a=n=>{u(n).hidden=!1};function y(n){let t=n?`imjang://complex?complexId=${encodeURIComponent(n)}`:"imjang://";return u("retry").href=t,t}function w(n){let t=n.filter(o=>{var r;return o.sale_median!=null&&((r=o.sale_count)!=null?r:0)>0});return t.length===0?null:t.sort((o,r)=>{var l,e;return((l=r.sale_count)!=null?l:0)-((e=o.sale_count)!=null?e:0)})[0]}function $(n){var o,r;u("pv-name").textContent=n.name;let t=[(r=(o=n.jibun_address)!=null?o:n.road_address)!=null?r:"",n.build_year!=null?`${n.build_year}\uB144`:"",n.total_units!=null?`${n.total_units.toLocaleString("ko-KR")}\uC138\uB300`:""].filter(Boolean).join(" \xB7 ");u("pv-sub").textContent=t,a("preview")}function T(n){var r,l;let t=(r=_[n.band])!=null?r:n.band,o=((l=n.sale_count)!=null?l:0)<3?"~":"";u("pv-price").textContent=`${t} ${s.saleMedianOf} ${o}${b(n.sale_median)}`,u("pv-basis").textContent=`${x(n.sale_window)} \xB7 ${n.sale_count}\uAC74 \uAE30\uC900`,a("pv-price"),a("pv-basis")}function E(n,t){var l;let o=t.filter(e=>g(e.exclusive_m2)===n).slice(0,5);if(o.length===0)return;u("pv-tx-title").textContent=`${s.txTitle} \xB7 ${(l=_[n])!=null?l:n}`;let r=u("pv-tx-rows");for(let e of o){let c=document.createElement("li"),d=document.createElement("span");d.className="tx-date",d.textContent=e.contract_date.replaceAll("-",".");let i=document.createElement("span");i.className="tx-price",i.textContent=b(e.price_man);let p=document.createElement("span");if(p.className="tx-meta",p.textContent=[e.floor!=null?`${e.floor}${s.floorSuffix}`:"",`${Math.round(e.exclusive_m2)}\u33A1`].filter(Boolean).join(" \xB7 "),c.append(d,i,p),e.deal==="\uC9C1\uAC70\uB798"){let f=document.createElement("span");f.className="tx-chip",f.textContent=s.dealDirect,c.append(f)}r.append(c)}a("pv-tx")}async function L(){var o;let n=new URLSearchParams(location.search).get("c"),t=y(n);if(/android/i.test(navigator.userAgent))u("store").hidden=!0,u("retry").hidden=!0,a("android-note");else try{location.replace(t)}catch(r){}if(!(!n||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(n)))try{let r="id,name,road_address,jibun_address,build_year,total_units,merged_into",l=await m(`/rest/v1/complex?id=eq.${n}&select=${r}`),e=(o=l[0])!=null?o:null;if(e!=null&&e.merged_into&&e.merged_into!==e.id&&(l=await m(`/rest/v1/complex?id=eq.${e.merged_into}&select=${r}`),l[0]&&(e=l[0],y(e.id))),!e){u("pv-name").textContent=s.gone,a("preview");return}$(e);let[c,d]=await Promise.all([m("/rest/v1/rpc/complex_band_metrics",{method:"POST",body:JSON.stringify({p_complex_id:e.id})}),m(`/rest/v1/transaction?complex_id=eq.${e.id}&trade_type=eq.sale&cancelled_at=is.null&select=contract_date,price_man,floor,exclusive_m2,deal:raw->>dealingGbn&order=contract_date.desc&limit=40`)]),i=w(c);i&&(T(i),E(i.band,d))}catch(r){}}L();})();
 </script>
 </body>
 </html>
