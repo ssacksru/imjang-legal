@@ -33,11 +33,18 @@ h1{font-size:1.7rem;letter-spacing:-.02em;margin:0}
 .store-btn small{font-size:11px;color:var(--t3)}
 .store-note{font-size:.82rem;color:var(--t3);margin:0 0 2.4rem}
 h2{font-size:1.02rem;margin:0 0 .6rem}
-ul.plain{list-style:none;padding:0;margin:0 0 2.4rem}
-ul.plain li{padding:.62rem 0;border-top:1px solid var(--line);font-size:.95rem}
-ul.plain li:last-child{border-bottom:1px solid var(--line)}
-ul.plain b{font-weight:700}
-ul.plain .why{display:block;color:var(--muted);font-size:.87rem;margin-top:.12rem}
+.hero{display:block;width:100%;border-radius:18px;border:1px solid var(--line);margin:0 0 2.6rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:14px;margin:0 0 2.4rem}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--card);overflow:hidden;display:flex;flex-direction:column}
+.card img{display:block;width:100%;height:auto;border-bottom:1px solid var(--line)}
+.card .cap{padding:.85rem 1rem 1rem}
+.card b{font-weight:700;font-size:.95rem}
+.card .why{display:block;color:var(--muted);font-size:.86rem;margin-top:.2rem;line-height:1.6}
+.card.noimg{justify-content:center;background:linear-gradient(160deg,var(--accent),#4a7be0);border-color:transparent}
+.card.noimg b,.card.noimg .why{color:#fff}
+.card.noimg .why{opacity:.85}
+.card.noimg .cap{padding:1.4rem 1.1rem}
+.card.noimg .icon{font-size:1.6rem;display:block;margin-bottom:.4rem}
 .trust{color:var(--muted);font-size:.92rem;line-height:1.7;margin:0 0 1.6rem}
 .trust b{color:var(--ink);font-weight:650}
 .stance{color:var(--t3);font-size:.82rem;margin:0 0 2.4rem}
@@ -65,21 +72,29 @@ footer a{color:var(--muted);margin-right:1rem}
 </div>
 <p class="store-note">무료 · 로그인 없이도 둘러볼 수 있어요</p>
 
+<img class="hero" src="./assets/hero.webp" width="720" height="1564"
+  alt="내 돈으로 갈 수 있는 집이 전국에 14,630곳 — 전국 지도에 후보가 켜진 화면">
+
 <h2>이 앱으로 할 수 있는 것</h2>
-<ul class="plain">
-  <li><b>급전세·급월세, 매일 아침 받아보기</b>
-    <span class="why">같은 단지·같은 평형 실거래보다 내려온 전월세만 골라 드려요. 지역·예산·평형·통근으로 좁히고, 조건 알림도 걸 수 있어요.</span></li>
-  <li><b>이 호가가 어떤 값인지 바로 확인</b>
-    <span class="why">같은 평형 실거래 추이, 전세가율, 등록임대 여부, 매매가까지 한 화면에. 중개사에게 전화로 물어볼 것도 매물마다 만들어 드려요.</span></li>
-  <li><b>내 예산으로 갈 수 있는 곳 전국에서 찾기</b>
-    <span class="why">현금과 조건을 넣으면 사정권의 시군구와 단지가 지도에 켜져요. 지하철 통근 시간으로도 좁혀 보세요.</span></li>
-  <li><b>마음에 든 집, 링크 하나로 공유</b>
-    <span class="why">호가와 실거래를 나눠 적고 본 날짜까지 같이 가요. 받은 사람은 링크만 눌러도 그 매물이 열려요.</span></li>
-  <li><b>계약, 미리 연습</b>
-    <span class="why">취득세·중개보수·대출을 계산하고 표준 서식 계약서를 미리 써봐요.</span></li>
-  <li><b>집 보러 가는 날 준비까지</b>
-    <span class="why">그 단지라서 확인할 것과 물어볼 근거를 챙겨 드려요. 현장 기록은 오프라인에서도 저장돼요.</span></li>
-</ul>
+<div class="cards">
+  <div class="card"><img src="./assets/feed.webp" loading="lazy" width="720" height="1564" alt="수도권 급전세·급월세를 매일 골라주는 피드 화면">
+    <div class="cap"><b>급전세·급월세, 매일 아침 받아보기</b>
+    <span class="why">같은 단지·같은 평형 실거래보다 내려온 전월세만 골라 드려요. 지역·예산·평형·통근으로 좁히고, 조건 알림도 걸 수 있어요.</span></div></div>
+  <div class="card"><img src="./assets/why.webp" loading="lazy" width="720" height="1564" alt="단지 상세 — 가격의 근거를 입지부터 한눈에 보는 화면">
+    <div class="cap"><b>이 호가가 어떤 값인지 바로 확인</b>
+    <span class="why">같은 평형 실거래 추이, 전세가율, 등록임대 여부, 매매가까지 한 화면에. 중개사에게 전화로 물어볼 것도 매물마다 만들어 드려요.</span></div></div>
+  <div class="card"><img src="./assets/map.webp" loading="lazy" width="720" height="1564" alt="지도에서 동네별 가격을 살펴보는 화면">
+    <div class="cap"><b>내 예산으로 갈 수 있는 곳 전국에서 찾기</b>
+    <span class="why">현금과 조건을 넣으면 사정권의 시군구와 단지가 지도에 켜져요. 지하철 통근 시간으로도 좁혀 보세요.</span></div></div>
+  <div class="card noimg"><div class="cap"><span class="icon">🔗</span><b>마음에 든 집, 링크 하나로 공유</b>
+    <span class="why">호가와 실거래를 나눠 적고 본 날짜까지 같이 가요. 받은 사람은 링크만 눌러도 그 매물이 열려요.</span></div></div>
+  <div class="card"><img src="./assets/mock.webp" loading="lazy" width="720" height="1564" alt="취득세·중개보수·대출을 계약 전에 계산하는 화면">
+    <div class="cap"><b>계약, 미리 연습</b>
+    <span class="why">취득세·중개보수·대출을 계산하고 표준 서식 계약서를 미리 써봐요.</span></div></div>
+  <div class="card"><img src="./assets/pack.webp" loading="lazy" width="720" height="1564" alt="임장 체크리스트와 물어볼 근거를 챙겨주는 화면">
+    <div class="cap"><b>집 보러 가는 날 준비까지</b>
+    <span class="why">그 단지라서 확인할 것과 물어볼 근거를 챙겨 드려요. 현장 기록은 오프라인에서도 저장돼요.</span></div></div>
+</div>
 
 <p class="trust"><b>판정 대신, 근거를 드려요.</b> 저평가·추천·전망 같은 판정 없이 값마다 출처와
 기준일을 답니다. 호가와 실거래는 항상 다른 줄에 두고, 거래가 적으면 적다고 보여드려요 —
